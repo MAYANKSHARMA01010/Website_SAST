@@ -7,7 +7,6 @@ import { showToast } from "../main.jsx";
 import { BASE_URL } from "../api";
 
 export default function Login() {
-  const [method, setMethod] = useState("email");
   const [showPassword, setShowPassword] = useState(false);
   const [loader, setLoader] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -16,7 +15,6 @@ export default function Login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    phone: "",
   });
 
   useEffect(() => {
@@ -24,36 +22,24 @@ export default function Login() {
   }, []);
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const isValidPhone = (phone) => /^[0-9]{10}$/.test(phone);
 
   const handleLogin = async () => {
     try {
-      if (method === "email") {
-        if (!isValidEmail(formData.email)) {
-          showToast("Please enter a valid email!", "error");
-          return;
-        }
-        if (!formData.password) {
-          showToast("Password is required!", "error");
-          return;
-        }
-      } else if (method === "phone") {
-        if (!isValidPhone(formData.phone)) {
-          showToast("Please enter a valid 10-digit phone number!", "error");
-          return;
-        }
-        if (!formData.password) {
-          showToast("Password is required!", "error");
-          return;
-        }
+      if (!isValidEmail(formData.email)) {
+        showToast("Please enter a valid email!", "error");
+        return;
+      }
+      if (!formData.password) {
+        showToast("Password is required!", "error");
+        return;
       }
 
       setLoader(true);
 
-      const payload =
-        method === "email"
-          ? { email: formData.email.trim(), password: formData.password }
-          : { phone: formData.phone.trim(), password: formData.password };
+      const payload = {
+        email: formData.email.trim(),
+        password: formData.password,
+      };
 
       const res = await fetch(`${BASE_URL}/users/login`, {
         method: "POST",
@@ -260,7 +246,6 @@ export default function Login() {
       <Navbar />
 
       <div className="space-container">
-        {/* Animated Background */}
         <div className="space-bg-layer">
           <div className="gradient-layer"></div>
           <div className="radial-layer"></div>
@@ -276,7 +261,6 @@ export default function Login() {
           ))}
         </div>
 
-        {/* Content */}
         <div className="content-wrapper">
           <div
             style={{
@@ -334,75 +318,29 @@ export default function Login() {
 
               {/* Login Card */}
               <div className="login-card">
-                {/* Method Toggle */}
-                <div className="method-toggle" style={{ marginBottom: "32px" }}>
-                  <button
-                    onClick={() => setMethod("email")}
-                    className={`method-btn ${method === "email" ? "active" : ""}`}
-                  >
-                    Email
-                  </button>
-                  <button
-                    onClick={() => 
-                      showToast("Phone login is not implemented yet.", "error")
-                    }
-                    className={`method-btn ${method === "phone" ? "active" : ""}`}
-                  >
-                    Phone
-                  </button>
-                </div>
-
                 {/* Email Input */}
-                {method === "email" && (
-                  <div style={{ marginBottom: "24px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#d1d5db",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      className="input-field"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                    />
-                  </div>
-                )}
-
-                {/* Phone Input */}
-                {method === "phone" && (
-                  <div style={{ marginBottom: "24px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#d1d5db",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      Phone Number
-                    </label>
-                    <input
-                      type="text"
-                      className="input-field"
-                      placeholder="Enter your phone number"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                    />
-                  </div>
-                )}
+                <div style={{ marginBottom: "24px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#d1d5db",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    className="input-field"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
+                </div>
 
                 {/* Password Input */}
                 <div style={{ marginBottom: "32px" }}>
@@ -477,7 +415,7 @@ export default function Login() {
                     fontSize: "16px",
                   }}
                 >
-                  Don't have an account?{" "}
+                  Don’t have an account?{" "}
                   <span
                     onClick={() => navigate("/register")}
                     style={{
