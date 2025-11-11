@@ -51,8 +51,16 @@ export default function Login() {
 
       if (res.ok && result.token) {
         showToast("Login successful!", "success");
+        // Store token and role in localStorage
         localStorage.setItem("token", result.token);
-        navigate("/");
+        localStorage.setItem("role", result.user?.role || "user");
+
+        // Redirect based on role
+        if (result.user?.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/");
+        }
       } else {
         showToast(result.message || "Invalid credentials", "error");
       }
@@ -73,191 +81,41 @@ export default function Login() {
 
   return (
     <>
+      {/* --- CSS unchanged --- */}
       <style>{`
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(40px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
-        .fade-in-up {
-          animation: fadeInUp 1s ease-out;
-        }
-
-        .space-container {
-          min-height: 100vh;
-          background: #000;
-          color: #fff;
-          overflow: hidden;
-          position: relative;
-        }
-
-        .space-bg-layer {
-          position: fixed;
-          inset: 0;
-          z-index: 0;
-        }
-
-        .gradient-layer {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, #000 50%, rgba(88, 28, 135, 0.2) 100%);
-        }
-
-        .radial-layer {
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(circle at 50% 50%, rgba(0,161,255,0.1), transparent 50%);
-        }
-
-        .star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: #60a5fa;
-          border-radius: 50%;
-          opacity: 0.6;
-        }
-
-        .content-wrapper {
-          position: relative;
-          z-index: 10;
-        }
-
-        .login-card {
-          background: rgba(255,255,255,0.05);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 24px;
-          padding: 48px;
-          transition: all 0.3s;
-        }
-
-        .login-card:hover {
-          border-color: rgba(59,130,246,0.3);
-          box-shadow: 0 10px 40px rgba(59,130,246,0.2);
-        }
-
-        .input-field {
-          width: 100%;
-          padding: 16px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 16px;
-          color: #fff;
-          font-size: 16px;
-          outline: none;
-          transition: all 0.3s;
-        }
-
-        .input-field:focus {
-          border-color: rgba(59,130,246,0.5);
-          background: rgba(255,255,255,0.08);
-        }
-
-        .input-field::placeholder {
-          color: #9ca3af;
-        }
-
-        .btn-primary {
-          width: 100%;
-          background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-          color: #fff;
-          font-weight: 700;
-          font-size: 18px;
-          padding: 16px;
-          border: none;
-          border-radius: 16px;
-          cursor: pointer;
-          transition: all 0.3s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 30px rgba(59,130,246,0.4);
-        }
-
-        .btn-primary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .method-toggle {
-          display: flex;
-          background: rgba(255,255,255,0.05);
-          border-radius: 16px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .method-btn {
-          flex: 1;
-          padding: 12px;
-          border: none;
-          border-radius: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-          background: transparent;
-          color: #d1d5db;
-        }
-
-        .method-btn.active {
-          background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-          color: #fff;
-          box-shadow: 0 4px 12px rgba(59,130,246,0.4);
-        }
-
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: rgba(59,130,246,0.1);
-          border: 1px solid rgba(59,130,246,0.2);
-          border-radius: 50px;
-          padding: 8px 16px;
-          margin-bottom: 24px;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        .spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid rgba(255,255,255,0.2);
-          border-top: 2px solid #fff;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
+        .fade-in-up { animation: fadeInUp 1s ease-out; }
+        .space-container { min-height: 100vh; background: #000; color: #fff; overflow: hidden; position: relative; }
+        .space-bg-layer { position: fixed; inset: 0; z-index: 0; }
+        .gradient-layer { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(30,58,138,0.2) 0%, #000 50%, rgba(88,28,135,0.2) 100%); }
+        .radial-layer { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(0,161,255,0.1), transparent 50%); }
+        .star { position: absolute; width: 2px; height: 2px; background: #60a5fa; border-radius: 50%; opacity: 0.6; }
+        .content-wrapper { position: relative; z-index: 10; }
+        .login-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 48px; transition: all 0.3s; }
+        .login-card:hover { border-color: rgba(59,130,246,0.3); box-shadow: 0 10px 40px rgba(59,130,246,0.2); }
+        .input-field { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: #fff; font-size: 16px; outline: none; transition: all 0.3s; }
+        .input-field:focus { border-color: rgba(59,130,246,0.5); background: rgba(255,255,255,0.08); }
+        .input-field::placeholder { color: #9ca3af; }
+        .btn-primary { width: 100%; background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%); color: #fff; font-weight: 700; font-size: 18px; padding: 16px; border: none; border-radius: 16px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59,130,246,0.4); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 50px; padding: 8px 16px; margin-bottom: 24px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.2); border-top: 2px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; }
       `}</style>
 
       <Navbar />
 
+      {/* --- UI same --- */}
       <div className="space-container">
         <div className="space-bg-layer">
           <div className="gradient-layer"></div>
           <div className="radial-layer"></div>
           {starPositions.map((star, i) => (
-            <div
-              key={i}
-              className="star"
-              style={{
-                left: `${star.left}%`,
-                top: `${star.top}%`,
-              }}
-            />
+            <div key={i} className="star" style={{ left: `${star.left}%`, top: `${star.top}%` }} />
           ))}
         </div>
 
@@ -273,20 +131,12 @@ export default function Login() {
               paddingBottom: "80px",
             }}
           >
-            <div
-              className="fade-in-up"
-              style={{
-                width: "100%",
-                maxWidth: "480px",
-              }}
-            >
+            <div className="fade-in-up" style={{ width: "100%", maxWidth: "480px" }}>
               {/* Badge */}
               <div style={{ textAlign: "center" }}>
                 <div className="badge">
                   <Rocket style={{ width: 16, height: 16, color: "#60a5fa" }} />
-                  <span style={{ color: "#93c5fd", fontSize: 14, fontWeight: 500 }}>
-                    SAST Portal Access
-                  </span>
+                  <span style={{ color: "#93c5fd", fontSize: 14, fontWeight: 500 }}>SAST Portal Access</span>
                 </div>
               </div>
 
@@ -320,15 +170,7 @@ export default function Login() {
               <div className="login-card">
                 {/* Email Input */}
                 <div style={{ marginBottom: "24px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: "#d1d5db",
-                      marginBottom: "12px",
-                    }}
-                  >
+                  <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#d1d5db", marginBottom: "12px" }}>
                     Email Address
                   </label>
                   <input
@@ -336,23 +178,13 @@ export default function Login() {
                     className="input-field"
                     placeholder="Enter your email"
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
 
                 {/* Password Input */}
                 <div style={{ marginBottom: "32px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: "#d1d5db",
-                      marginBottom: "12px",
-                    }}
-                  >
+                  <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#d1d5db", marginBottom: "12px" }}>
                     Password
                   </label>
                   <div style={{ position: "relative" }}>
@@ -361,9 +193,7 @@ export default function Login() {
                       className="input-field"
                       placeholder="Enter your password"
                       value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       style={{ paddingRight: "48px" }}
                     />
                     <button
@@ -388,11 +218,7 @@ export default function Login() {
                 </div>
 
                 {/* Login Button */}
-                <button
-                  className="btn-primary"
-                  onClick={handleLogin}
-                  disabled={loader}
-                >
+                <button className="btn-primary" onClick={handleLogin} disabled={loader}>
                   {loader ? (
                     <>
                       <div className="spinner"></div>
